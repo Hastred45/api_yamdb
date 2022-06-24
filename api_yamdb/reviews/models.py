@@ -17,15 +17,14 @@ class Titles(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.CharField(max_length=256, blank=True, null=True)
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genres,
-        on_delete=models.CASCADE,
         related_name='genre',
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.CASCADE,
-        related_name='category'
+        on_delete=models.CASCADE, #не забыть поменять на что-то вроде SET_DEFAULT
+        related_name='category',
     )
 
 
