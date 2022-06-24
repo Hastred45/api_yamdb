@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from reviews.models import Categories, Genres, Titles
+from rest_framework.response import Response
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -20,3 +22,41 @@ class TokenSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('username', 'confirmation_code')
+
+     
+class CategoriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Categories
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
+
+
+class GenresSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('name', 'slug')
+        model = Genres
+        lookup_field = 'slug'
+        extra_kwargs = {
+            'url': {'lookup_field': 'slug'}
+        }
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    genre = serializers.SlugRelatedField(
+        many=True,
+        slug_field='slug',
+        queryset=Genres.objects.all()
+    )
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Categories.objects.all()
+    )
+    class Meta:
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+        model = Titles
+
