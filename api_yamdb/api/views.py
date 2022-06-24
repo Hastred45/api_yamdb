@@ -2,7 +2,7 @@ import uuid
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import status, viewsets
 from django.db import IntegrityError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
@@ -48,3 +48,57 @@ def token_post(request):
         token = str(AccessToken.for_user(user_base))
         return Response({'token': token}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    '''
+    BLA BLA BLA
+    Подписка.
+
+    Все операции с подписками доступны только авторизованным
+    пользователям.
+    Вьюсет дает возможности:
+    1. Получить список всех подписчиков автора запроса.
+    2. Полученить, обновить, удалить подписку по id.
+    Обновление, удаление подписок доступны только их
+    авторам.
+    '''
+    pass
+    # serializer_class = FollowSerializer
+    # permission_classes = (permissions.IsAuthenticated, OwnerOrReadOnly)
+    # filter_backends = (filters.SearchFilter, )
+    # search_fields = ('=following__username',)
+
+    # def get_queryset(self):
+    #     n_queryset = self.request.user.follower.all()
+    #     return n_queryset
+
+    # def perform_create(self, serializer):
+    #     serializer.save(user=self.request.user)
+
+class CommentsViewSet(viewsets.ModelViewSet):
+    '''
+    BLA BLA BLA
+    Комментарии.
+
+    Вьюсет дает возможности:
+    1. Получить список всех комментариев.
+    Добавление комментариев возможно только для авторизованных пользователей.
+    2. Полученить, обновить, удалить комментария по id.
+    Обновление, удаление комментария доступны только их авторам,
+    анонимные запросы запрещены.
+    '''
+    pass
+    # serializer_class = CommentSerializer
+    # permission_classes = (OwnerOrReadOnly,)
+
+    # def get_queryset(self):
+    #     post_id = self.kwargs.get("post_id")
+    #     post = get_object_or_404(Post, pk=post_id)
+    #     n_queryset = post.comments.all()
+    #     return n_queryset
+
+    # def perform_create(self, serializer):
+    #     post_id = self.kwargs.get("post_id")
+    #     post = get_object_or_404(Post, pk=post_id)
+    #     serializer.save(author=self.request.user, post=post)
