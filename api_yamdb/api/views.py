@@ -1,14 +1,17 @@
 import uuid
 
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
 from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
+from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.decorators import api_view
-from .serializers import SignUpSerializer, TokenSerializer
+from reviews.models import Categories, Genres, Titles
 from users.models import User
+
+from .serializers import (CategoriesSerializer, GenresSerializer,
+                          SignUpSerializer, TitleSerializer, TokenSerializer)
 
 
 @api_view(['POST'])
@@ -50,6 +53,27 @@ def token_post(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class CategoriesViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    
+    queryset = Categories.objects.all()
+    serializer_class = CategoriesSerializer
+    lookup_field = 'slug'
+        
+
+class GenresViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    
+    queryset = Genres.objects.all()
+    serializer_class = GenresSerializer
+    lookup_field = 'slug'
+
+
+class TitlesViewSet(viewsets.ModelViewSet):
+
+    queryset = Titles.objects.all()
+    serializer_class = TitleSerializer
+
+
+    
 class ReviewViewSet(viewsets.ModelViewSet):
     '''
     BLA BLA BLA
