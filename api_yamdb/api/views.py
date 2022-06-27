@@ -3,13 +3,16 @@ import uuid
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from rest_framework import mixins, status, viewsets
+#from django_filters.rest_framework import DjangoFilterBackend надо разобраться с версиями Джанго
+from rest_framework import mixins, status, viewsets, filters
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.pagination import LimitOffsetPagination
+
 from reviews.models import Categories, Genres, Titles
 from users.models import User
-
+from .permissions import AnonReadOnlyAdminAll
 from .serializers import (CategoriesSerializer, GenresSerializer,
                           SignUpSerializer, TitleSerializer, TokenSerializer)
 
@@ -54,24 +57,32 @@ def token_post(request):
 
 
 class CategoriesViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    
+    permission_classes = [AnonReadOnlyAdminAll]
+    filter_backends = (filters.SearchFilter,)
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ('name',)
     lookup_field = 'slug'
         
 
 class GenresViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
-    
+    permission_classes = [AnonReadOnlyAdminAll]
+    filter_backends = (filters.SearchFilter,)
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
+    pagination_class = LimitOffsetPagination
+    search_fields = ('name',)
     lookup_field = 'slug'
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-
+    permission_classes = [AnonReadOnlyAdminAll]
+    #filter_backends = (DjangoFilterBackend,)
     queryset = Titles.objects.all()
     serializer_class = TitleSerializer
-
+    pagination_class = LimitOffsetPagination
+    #filterset_fields = ('category', 'genre', 'name', 'year')
 
     
 class ReviewViewSet(viewsets.ModelViewSet):

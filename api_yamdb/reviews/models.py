@@ -20,10 +20,11 @@ class Titles(models.Model):
     genre = models.ManyToManyField(
         Genres,
         related_name='genre',
+        #Тут вообще on_delete не бывает, я не хочу все переделывать на through модель
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.CASCADE, #не забыть поменять на что-то вроде SET_DEFAULT
+        on_delete=models.DO_NOTHING, #затык, надо разобраться
         related_name='category',
     )
 
