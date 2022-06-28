@@ -1,12 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-# from users.models import User
+from users.models import User
 
-# TODODO delete User = get_user_model()
-from django.contrib.auth import get_user_model
-User = get_user_model()
-# 
 
 class Categories(models.Model):
     name = models.CharField(max_length=256,)
@@ -29,7 +25,7 @@ class Titles(models.Model):
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.CASCADE, #не забыть поменять на что-то вроде SET_DEFAULT
+        on_delete=models.CASCADE,
         related_name='category',
     )
 
@@ -60,9 +56,7 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        msg=f'{self.title} || {self.text} || {self.author} || {self.id}'
-        # return self.text
-        return msg
+        return self.text
 
     class Meta:
         constraints = (
@@ -75,6 +69,7 @@ class Review(models.Model):
                 name='%(app_label)s_%(class)s_unique_title_author',
             ),
         )
+
 
 class Comments(models.Model):
     review = models.ForeignKey(
@@ -92,4 +87,3 @@ class Comments(models.Model):
         'Дата публикации',
         auto_now_add=True,
     )
-

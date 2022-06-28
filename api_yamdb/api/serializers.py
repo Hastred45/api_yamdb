@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.response import Response
 
-from reviews.models import Categories, Genres, Titles, Review, Comments
+from reviews.models import Categories, Comments, Genres, Review, Titles
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -24,7 +24,7 @@ class TokenSerializer(serializers.Serializer):
     class Meta:
         fields = ('username', 'confirmation_code')
 
-     
+
 class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -57,6 +57,7 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Categories.objects.all()
     )
+
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
