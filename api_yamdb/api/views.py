@@ -3,6 +3,7 @@ import uuid
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+#from django_filters.rest_framework import DjangoFilterBackend надо разобраться с версиями Джанго
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
@@ -12,6 +13,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Categories, Genres, Review, Titles
 from users.models import User
 
+from .permissions import AnonReadOnlyAdminAll
 from .serializers import (CategoriesSerializer, CommentsSerializer,
                           GenresSerializer, ReviewSerializer, SignUpSerializer,
                           TitleSerializer, TokenSerializer)
@@ -56,28 +58,19 @@ def token_post(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CategoriesViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-
+class CategoriesViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    permission_classes = [AnonReadOnlyAdminAll]
+    filter_backends = (filters.SearchFilter,)
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
-    lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('=slug',)
+    search_fields = ('name', '=slug')
+    lookup_field = 'slug'
 
 
-class GenresViewSet(
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-
+class GenresViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    permission_classes = [AnonReadOnlyAdminAll]
+    filter_backends = (filters.SearchFilter,)
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
     lookup_field = 'slug'
@@ -87,10 +80,12 @@ class GenresViewSet(
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-
+    permission_classes = [AnonReadOnlyAdminAll]
+    #filter_backends = (DjangoFilterBackend,)
     queryset = Titles.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
+    #filterset_fields = ('category', 'genre', 'name', 'year')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

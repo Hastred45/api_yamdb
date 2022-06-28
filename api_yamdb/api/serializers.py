@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.response import Response
 
 from reviews.models import Categories, Comments, Genres, Review, Titles
 
@@ -61,6 +60,12 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['category'] = CategoriesSerializer(instance.category).data
+        representation['genre'] = GenresSerializer(instance.genre.all(), many=True).data
+        return representation
 
 
 class ReviewSerializer(serializers.ModelSerializer):

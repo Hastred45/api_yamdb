@@ -15,17 +15,18 @@ class Genres(models.Model):
 
 
 class Titles(models.Model):
-    name = models.CharField(max_length=256, default="",)
+    name = models.CharField(max_length=256,)
     year = models.IntegerField(default="",)
     # TODODO rating
     description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(
         Genres,
         related_name='genre',
+        #Тут вообще on_delete не бывает, я не хочу все переделывать на through модель
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING, #затык, надо разобраться
         related_name='category',
     )
 
