@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Categories, Genres, Titles
+from reviews.models import Categories, Comments, Genres, Review, Titles
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -23,11 +23,11 @@ class TokenSerializer(serializers.Serializer):
     class Meta:
         fields = ('username', 'confirmation_code')
 
-     
+
 class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug')
+        fields = ('id', 'name', 'slug')
         model = Categories
         lookup_field = 'slug'
         extra_kwargs = {
@@ -38,7 +38,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
 class GenresSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug')
+        fields = ('id', 'name', 'slug')
         model = Genres
         lookup_field = 'slug'
         extra_kwargs = {
@@ -56,6 +56,7 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Categories.objects.all()
     )
+
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
@@ -65,3 +66,31 @@ class TitleSerializer(serializers.ModelSerializer):
         representation['category'] = CategoriesSerializer(instance.category).data
         representation['genre'] = GenresSerializer(instance.genre.all(), many=True).data
         return representation
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        slug_field="username"
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('id', 'title', 'author', 'pub_date')
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        slug_field="username"
+    )
+
+    class Meta:
+        model = Comments
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('id', 'review', 'author', 'pub_date')

@@ -1,5 +1,6 @@
 from rest_framework import permissions
 
+
 #Спросить Hastred45 про юзеров
 class AnonReadOnlyAdminAll(permissions.BasePermission):
     pass

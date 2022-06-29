@@ -4,17 +4,19 @@ from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 #from django_filters.rest_framework import DjangoFilterBackend надо разобраться с версиями Джанго
-from rest_framework import mixins, status, viewsets, filters
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.pagination import LimitOffsetPagination
 
-from reviews.models import Categories, Genres, Titles
+from reviews.models import Categories, Genres, Review, Titles
 from users.models import User
+
 from .permissions import AnonReadOnlyAdminAll
-from .serializers import (CategoriesSerializer, GenresSerializer,
-                          SignUpSerializer, TitleSerializer, TokenSerializer)
+from .serializers import (CategoriesSerializer, CommentsSerializer,
+                          GenresSerializer, ReviewSerializer, SignUpSerializer,
+                          TitleSerializer, TokenSerializer)
 
 
 @api_view(['POST'])
@@ -62,18 +64,19 @@ class CategoriesViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.D
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ('name',)
+    search_fields = ('name', '=slug')
     lookup_field = 'slug'
-        
+
 
 class GenresViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (filters.SearchFilter,)
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
-    pagination_class = LimitOffsetPagination
-    search_fields = ('name',)
     lookup_field = 'slug'
+    pagination_class = LimitOffsetPagination
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('=name',)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
@@ -84,56 +87,66 @@ class TitlesViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     #filterset_fields = ('category', 'genre', 'name', 'year')
 
-    
+
 class ReviewViewSet(viewsets.ModelViewSet):
     '''
-    BLA BLA BLA
-    Подписка.
-
-    Все операции с подписками доступны только авторизованным
-    пользователям.
+    Отзывы.
     Вьюсет дает возможности:
-    1. Получить список всех подписчиков автора запроса.
-    2. Полученить, обновить, удалить подписку по id.
-    Обновление, удаление подписок доступны только их
-    авторам.
+    1. Получить список всех отзывов. Доступно без токена.
+    2. Добавить новый отзыв. Пользователь может оставить
+       только один отзыв на произведение.
+       Доступно только аутентифицированным пользователям.
+    3. Получить отзыв по id для указанного произведения. Доступно без токена.
+    4. Частично обновить отзыв по id.
+       Доступно только авторам отзыва, модераторам или администраторам.
+    5. Удалить отзыв по id. Доступно только авторам отзыва,
+       модераторам или администраторам.
     '''
-    pass
-    # serializer_class = FollowSerializer
+    serializer_class = ReviewSerializer
+    pagination_class = LimitOffsetPagination
     # permission_classes = (permissions.IsAuthenticated, OwnerOrReadOnly)
-    # filter_backends = (filters.SearchFilter, )
-    # search_fields = ('=following__username',)
 
-    # def get_queryset(self):
-    #     n_queryset = self.request.user.follower.all()
-    #     return n_queryset
+    def get_queryset(self):
+        title_id = self.kwargs.get("title_id")
+        title_u = get_object_or_404(Titles, pk=title_id)
+        n_queryset = title_u.title_review.all()
 
-    # def perform_create(self, serializer):
-    #     serializer.save(user=self.request.user)
+        return n_queryset
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get("title_id")
+        title_u = get_object_or_404(Titles, pk=title_id)
+        serializer.save(author=self.request.user, title=title_u)
+
 
 class CommentsViewSet(viewsets.ModelViewSet):
     '''
-    BLA BLA BLA
     Комментарии.
-
     Вьюсет дает возможности:
-    1. Получить список всех комментариев.
-    Добавление комментариев возможно только для авторизованных пользователей.
-    2. Полученить, обновить, удалить комментария по id.
-    Обновление, удаление комментария доступны только их авторам,
-    анонимные запросы запрещены.
+    1. Получить список всех комментариев к отзыву по id. Доступно без токена.
+    2. Добавить новый комментарий для отзыва.
+       Доступно только аутентифицированным пользователям.
+    3. Получить комментарий для отзыва по id. Доступно без токена.
+    4. Частично обновить комментарий к отзыву по id.
+       Доступно только авторам комментария, модераторам или администраторам.
+    5. Удалить комментарий к отзыву по id.
+       Доступно только авторам комментария, модераторам или администраторам.
     '''
-    pass
-    # serializer_class = CommentSerializer
-    # permission_classes = (OwnerOrReadOnly,)
+    serializer_class = CommentsSerializer
+    pagination_class = LimitOffsetPagination
+    # permission_classes = (permissions.IsAuthenticated, OwnerOrReadOnly)
 
-    # def get_queryset(self):
-    #     post_id = self.kwargs.get("post_id")
-    #     post = get_object_or_404(Post, pk=post_id)
-    #     n_queryset = post.comments.all()
-    #     return n_queryset
+    def get_queryset(self):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Titles, pk=title_id)
+        review_id = self.kwargs.get("review_id")
+        review_u = get_object_or_404(Review, pk=review_id, title=title)
+        n_queryset = review_u.comment.all()
+        return n_queryset
 
-    # def perform_create(self, serializer):
-    #     post_id = self.kwargs.get("post_id")
-    #     post = get_object_or_404(Post, pk=post_id)
-    #     serializer.save(author=self.request.user, post=post)
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Titles, pk=title_id)
+        review_id = self.kwargs.get("review_id")
+        review_u = get_object_or_404(Review, pk=review_id, title=title)
+        serializer.save(author=self.request.user, review=review_u)
