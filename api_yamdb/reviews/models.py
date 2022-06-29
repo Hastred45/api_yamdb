@@ -3,6 +3,12 @@ from django.db import models
 
 from users.models import User
 
+def get_delete_category():
+    return Categories.objects.get_or_create(
+        name='Категория была удалена администратором', 
+        slug='deleted'
+    )[0]
+
 
 class Categories(models.Model):
     name = models.CharField(max_length=256,)
@@ -22,11 +28,10 @@ class Titles(models.Model):
     genre = models.ManyToManyField(
         Genres,
         related_name='genre',
-        #Тут вообще on_delete не бывает, я не хочу все переделывать на through модель
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.DO_NOTHING, #затык, надо разобраться
+        on_delete=models.SET(get_delete_category()),
         related_name='category',
     )
 

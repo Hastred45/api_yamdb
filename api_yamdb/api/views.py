@@ -3,7 +3,7 @@ import uuid
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-#from django_filters.rest_framework import DjangoFilterBackend надо разобраться с версиями Джанго
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.pagination import LimitOffsetPagination
@@ -58,7 +58,10 @@ def token_post(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CategoriesViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class CategoriesViewSet(mixins.ListModelMixin,
+                        mixins.CreateModelMixin, 
+                        mixins.DestroyModelMixin, 
+                        viewsets.GenericViewSet):
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (filters.SearchFilter,)
     queryset = Categories.objects.all()
@@ -68,7 +71,10 @@ class CategoriesViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.D
     lookup_field = 'slug'
 
 
-class GenresViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class GenresViewSet(mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (filters.SearchFilter,)
     queryset = Genres.objects.all()
@@ -81,11 +87,11 @@ class GenresViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Destr
 
 class TitlesViewSet(viewsets.ModelViewSet):
     permission_classes = [AnonReadOnlyAdminAll]
-    #filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend,)
     queryset = Titles.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    #filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_fields = ('category', 'genre', 'name', 'year')
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
