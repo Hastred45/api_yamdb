@@ -62,12 +62,20 @@ class CategoriesViewSet(mixins.ListModelMixin,
                         mixins.CreateModelMixin, 
                         mixins.DestroyModelMixin, 
                         viewsets.GenericViewSet):
+    '''
+    Категории.
+    Вьюсет дает возможности:
+    1. Получить список всех категорий. Доступно без токена.
+       Поддерживается поиск по названию.
+    2. Добавить категорию. Доступно только администратору.
+    3. Удалить категорию. Доступно только администратору.
+    '''
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (filters.SearchFilter,)
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
     pagination_class = LimitOffsetPagination
-    search_fields = ('name', '=slug')
+    search_fields = ('=name',)
     lookup_field = 'slug'
 
 
@@ -75,6 +83,14 @@ class GenresViewSet(mixins.ListModelMixin,
                     mixins.CreateModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
+    '''
+    Жанры.
+    Вьюсет дает возможности:
+    1. Получить список всех жанров. Доступно без токена.
+       Поддерживается поиск по названию.
+    2. Добавить жанр. Доступно только администратору.
+    3. Удалить жанр. Доступно только администратору.
+    '''
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (filters.SearchFilter,)
     queryset = Genres.objects.all()
@@ -86,6 +102,18 @@ class GenresViewSet(mixins.ListModelMixin,
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
+    '''
+    Произведения.
+    Вьюсет дает возможности:
+    1. Получить список всех произведений. Доступно без токена.
+       Поддерживается фильтрация полученных произведений 
+       по обязательным полям. 
+    2. Добавить произведение. Доступно только администратору.
+    3. Получить произведение по id. Доступно без токена.
+    4. Частично обновить информацию о произведением.
+       Доступно только администратору.
+    5. Удалить произведение. Доступно только администратору.
+    '''
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (DjangoFilterBackend,)
     queryset = Titles.objects.all()
