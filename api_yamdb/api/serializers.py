@@ -1,3 +1,4 @@
+import datetime
 from rest_framework import serializers
 
 from reviews.models import Categories, Comments, Genres, Review, Titles
@@ -27,7 +28,7 @@ class TokenSerializer(serializers.Serializer):
 class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
         model = Categories
         lookup_field = 'slug'
         extra_kwargs = {
@@ -38,7 +39,7 @@ class CategoriesSerializer(serializers.ModelSerializer):
 class GenresSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
         model = Genres
         lookup_field = 'slug'
         extra_kwargs = {
@@ -66,6 +67,13 @@ class TitleSerializer(serializers.ModelSerializer):
         representation['category'] = CategoriesSerializer(instance.category).data
         representation['genre'] = GenresSerializer(instance.genre.all(), many=True).data
         return representation
+
+    def validate_year(self, value):
+        if value > datetime.now().year:
+            raise serializers.ValidationError(
+                'Нельзя указать код больше текущего'
+            )
+        return value
 
 
 class ReviewSerializer(serializers.ModelSerializer):
