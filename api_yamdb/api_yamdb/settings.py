@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'django_filters', тут надо разобраться с версиями Джанго
+    # 'django_filters', тут надо разобраться с версиями Джанго
     'rest_framework',
     'rest_framework_simplejwt',
     'api',
@@ -114,8 +114,8 @@ AUTH_USER_MODEL = 'users.User'
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
-#Отключил авторизацию для ручного тестирования api
-'''REST_FRAMEWORK = {
+# Отключил авторизацию для ручного тестирования api
+REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -129,4 +129,4 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
-}''' 
+}

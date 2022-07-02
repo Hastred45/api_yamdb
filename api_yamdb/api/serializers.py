@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from reviews.models import Categories, Genres, Titles
+from users.models import User
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -23,7 +24,35 @@ class TokenSerializer(serializers.Serializer):
     class Meta:
         fields = ('username', 'confirmation_code')
 
-     
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
+
+
+class MeSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
+
+
 class CategoriesSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -56,12 +85,16 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Categories.objects.all()
     )
+
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
         model = Titles
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['category'] = CategoriesSerializer(instance.category).data
-        representation['genre'] = GenresSerializer(instance.genre.all(), many=True).data
+        representation['category'] = CategoriesSerializer(
+            instance.category
+        ).data
+        representation['genre'] = GenresSerializer(instance.genre.all(),
+                                                   many=True).data
         return representation
