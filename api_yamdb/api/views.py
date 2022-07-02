@@ -88,10 +88,10 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-          
+
 class CategoriesViewSet(mixins.ListModelMixin,
-                        mixins.CreateModelMixin, 
-                        mixins.DestroyModelMixin, 
+                        mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
     '''
     Категории.
@@ -137,8 +137,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
     Произведения.
     Вьюсет дает возможности:
     1. Получить список всех произведений. Доступно без токена.
-       Поддерживается фильтрация полученных произведений 
-       по обязательным полям. 
+       Поддерживается фильтрация полученных произведений
+       по обязательным полям.
     2. Добавить произведение. Доступно только администратору.
     3. Получить произведение по id. Доступно без токена.
     4. Частично обновить информацию о произведением.
