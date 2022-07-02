@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'django_filters', С‚СѓС‚ РЅР°РґРѕ СЂР°Р·РѕР±СЂР°С‚СЊСЃСЏ СЃ РІРµСЂСЃРёСЏРјРё Р”Р¶Р°РЅРіРѕ
+    #'django_filters', тут надо разобраться с версиями Джанго
     'rest_framework',
     'rest_framework_simplejwt',
     'api',

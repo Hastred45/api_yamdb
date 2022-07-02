@@ -4,6 +4,7 @@ from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.models import Categories, Comments, Genres, Review, Titles
+from users.models import User
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -25,6 +26,34 @@ class TokenSerializer(serializers.Serializer):
 
     class Meta:
         fields = ('username', 'confirmation_code')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
+
+
+class MeSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role'
+        )
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
@@ -118,3 +147,4 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('id', 'review', 'author', 'pub_date')
+
