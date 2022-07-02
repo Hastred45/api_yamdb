@@ -1,6 +1,7 @@
+import datetime
 from rest_framework import serializers
 
-from reviews.models import Categories, Genres, Titles
+from reviews.models import Categories, Comments, Genres, Review, Titles
 from users.models import User
 
 
@@ -92,9 +93,42 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['category'] = CategoriesSerializer(
-            instance.category
-        ).data
-        representation['genre'] = GenresSerializer(instance.genre.all(),
-                                                   many=True).data
+        representation['category'] = CategoriesSerializer(instance.category).data
+        representation['genre'] = GenresSerializer(instance.genre.all(), many=True).data
         return representation
+
+    def validate_year(self, value):
+        if value > datetime.now().year:
+            raise serializers.ValidationError(
+                'Нельзя указать код больше текущего'
+            )
+        return value
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        slug_field="username"
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('id', 'title', 'author', 'pub_date')
+
+
+class CommentsSerializer(serializers.ModelSerializer):
+
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault(),
+        slug_field="username"
+    )
+
+    class Meta:
+        model = Comments
+        fields = ('id', 'text', 'author', 'pub_date')
+        read_only_fields = ('id', 'review', 'author', 'pub_date')
+

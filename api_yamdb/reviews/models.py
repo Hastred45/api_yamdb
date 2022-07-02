@@ -1,37 +1,44 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from users.models import User
+
+def get_delete_category():
+    return Categories.objects.get_or_create(
+        name='Категория была удалена администратором', 
+        slug='deleted'
+    )[0]
 
 
 class Categories(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256,)
+    slug = models.SlugField(unique=True,)
 
 
 class Genres(models.Model):
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=256,)
+    slug = models.SlugField(unique=True,)
 
 
 class Titles(models.Model):
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()
+    name = models.CharField(max_length=256,)
+    year = models.IntegerField(default="",)
+    # TODODO rating
     description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(
         Genres,
         related_name='genre',
-        #Тут вообще on_delete не бывает, я не хочу все переделывать на through модель
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.DO_NOTHING, #затык, надо разобраться
+        on_delete=models.SET(get_delete_category()),
         related_name='category',
     )
 
 
 class Review(models.Model):
     title = models.ForeignKey(
-        User,
+        Titles,
         on_delete=models.CASCADE,
         related_name='title_review',
         null=False,
@@ -70,20 +77,17 @@ class Review(models.Model):
         )
 
 
-# TODODO обязательное поле ?? text
-
-
 class Comments(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='review_comments',
+        related_name='comment',
     )
     text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_comments',
+        related_name='comment',
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
