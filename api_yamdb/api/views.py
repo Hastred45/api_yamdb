@@ -3,7 +3,7 @@ import uuid
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-# from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, action
 from rest_framework.pagination import (LimitOffsetPagination,
@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from reviews.models import Categories, Genres, Review, Titles
 from users.models import User
 
-from .permissions import AnonReadOnlyAdminAll, OwnerOrAdmins
+from .permissions import AuthorAndStaffOrReadOnly, OwnerOrAdmins, IsAdminOrReadOnly
 from .serializers import (CategoriesSerializer, CommentsSerializer,
                           GenresSerializer, ReviewSerializer, SignUpSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer,
@@ -101,7 +101,7 @@ class CategoriesViewSet(mixins.ListModelMixin,
     2. Добавить категорию. Доступно только администратору.
     3. Удалить категорию. Доступно только администратору.
     '''
-    permission_classes = [AnonReadOnlyAdminAll]
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     queryset = Categories.objects.all()
     serializer_class = CategoriesSerializer
@@ -122,7 +122,7 @@ class GenresViewSet(mixins.ListModelMixin,
     2. Добавить жанр. Доступно только администратору.
     3. Удалить жанр. Доступно только администратору.
     '''
-    permission_classes = [AnonReadOnlyAdminAll]
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     queryset = Genres.objects.all()
     serializer_class = GenresSerializer
@@ -145,8 +145,8 @@ class TitlesViewSet(viewsets.ModelViewSet):
        Доступно только администратору.
     5. Удалить произведение. Доступно только администратору.
     '''
-    permission_classes = [AnonReadOnlyAdminAll]
-    # filter_backends = (DjangoFilterBackend,)
+    permission_classes = [IsAdminOrReadOnly]
+    filter_backends = (DjangoFilterBackend,)
     queryset = Titles.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
@@ -169,7 +169,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     '''
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [AnonReadOnlyAdminAll]
+    permission_classes = [AuthorAndStaffOrReadOnly]
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
@@ -199,7 +199,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     '''
     serializer_class = CommentsSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = [AnonReadOnlyAdminAll]
+    permission_classes = [AuthorAndStaffOrReadOnly]
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from django.db.models import Avg
 from rest_framework import serializers
@@ -116,7 +116,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def validate_year(self, value):
         if value > datetime.now().year:
             raise serializers.ValidationError(
-                'Нельзя указать код больше текущего'
+                'Нельзя указать год больше текущего'
             )
         return value
 
