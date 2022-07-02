@@ -5,18 +5,21 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
-from rest_framework.decorators import api_view
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.decorators import api_view, action
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.permissions import IsAuthenticated
 
 from reviews.models import Categories, Genres, Review, Titles
 from users.models import User
 
-from .permissions import AnonReadOnlyAdminAll
+from .permissions import AnonReadOnlyAdminAll, OwnerOrAdmins
 from .serializers import (CategoriesSerializer, CommentsSerializer,
                           GenresSerializer, ReviewSerializer, SignUpSerializer,
-                          TitleSerializer, TokenSerializer)
+                          TitleSerializer, TokenSerializer, UserSerializer,
+                          MeSerializer)
 
 
 @api_view(['POST'])
@@ -58,6 +61,34 @@ def token_post(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = (OwnerOrAdmins, )
+    filter_backends = (filters.SearchFilter, )
+    filterset_fields = ('username')
+    search_fields = ('username', )
+    lookup_field = 'username'
+
+    @action(
+        methods=['get', 'patch'],
+        detail=False,
+        url_path='me',
+        permission_classes=(IsAuthenticated, )
+    )
+    def get_patch_me(self, request):
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == 'GET':
+            serializer = MeSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == 'PATCH':
+            serializer = MeSerializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+          
 class CategoriesViewSet(mixins.ListModelMixin,
                         mixins.CreateModelMixin, 
                         mixins.DestroyModelMixin, 
