@@ -3,9 +3,10 @@ from django.db import models
 
 from users.models import User
 
+
 def get_delete_category():
     return Categories.objects.get_or_create(
-        name='Категория была удалена администратором', 
+        name='Категория была удалена администратором',
         slug='deleted'
     )[0]
 
@@ -23,7 +24,6 @@ class Genres(models.Model):
 class Titles(models.Model):
     name = models.CharField(max_length=256,)
     year = models.IntegerField(default="",)
-    # TODODO rating
     description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(
         Genres,

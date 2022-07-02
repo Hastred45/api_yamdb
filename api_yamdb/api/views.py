@@ -59,8 +59,8 @@ def token_post(request):
 
 
 class CategoriesViewSet(mixins.ListModelMixin,
-                        mixins.CreateModelMixin, 
-                        mixins.DestroyModelMixin, 
+                        mixins.CreateModelMixin,
+                        mixins.DestroyModelMixin,
                         viewsets.GenericViewSet):
     permission_classes = [AnonReadOnlyAdminAll]
     filter_backends = (filters.SearchFilter,)
@@ -110,7 +110,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     '''
     serializer_class = ReviewSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes = (permissions.IsAuthenticated, OwnerOrReadOnly)
+    permission_classes = [AnonReadOnlyAdminAll]
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
@@ -140,7 +140,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     '''
     serializer_class = CommentsSerializer
     pagination_class = LimitOffsetPagination
-    # permission_classes = (permissions.IsAuthenticated, OwnerOrReadOnly)
+    permission_classes = [AnonReadOnlyAdminAll]
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')

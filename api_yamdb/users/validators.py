@@ -1,6 +1,6 @@
-from django.core.validators import RegexValidator
+# from django.core.validators import RegexValidator
 
 
-class UsernameValidator(RegexValidator):
-    regex = r'^[\w.@+-]+$'
-    flags = 0
+# class UsernameValidator(RegexValidator):
+#     regex = r'^[\w.@+-]+$'
+#     flags = 0
