@@ -21,7 +21,7 @@ class Genres(models.Model):
     slug = models.SlugField(unique=True,)
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(max_length=256,)
     year = models.IntegerField(default="",)
     description = models.CharField(max_length=256, blank=True, null=True)
@@ -38,7 +38,7 @@ class Titles(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         related_name='title_review',
         null=False,

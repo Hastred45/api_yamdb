@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import IsAuthenticated
 
-from reviews.models import Categories, Genres, Review, Titles
+from reviews.models import Categories, Genres, Review, Title
 from users.models import User
 
 from .permissions import (AuthorAndStaffOrReadOnly,
@@ -23,7 +23,7 @@ from .serializers import (CategoriesSerializer, CommentsSerializer,
                           TitleSerializer, TokenSerializer, UserSerializer,
                           MeSerializer)
 
-from .filters import TitlesFilter
+from .filters import TitleFilter
 
 
 @api_view(['POST'])
@@ -136,7 +136,7 @@ class GenresViewSet(mixins.ListModelMixin,
     search_fields = ('=name',)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     '''
     Произведения.
     Вьюсет дает возможности:
@@ -151,10 +151,10 @@ class TitlesViewSet(viewsets.ModelViewSet):
     '''
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
-    queryset = Titles.objects.all()
+    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    filter_class = TitlesFilter
+    filter_class = TitleFilter
     search_fields = ('category', 'genre', 'name', 'year')
 
 
@@ -178,14 +178,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
-        title_u = get_object_or_404(Titles, pk=title_id)
+        title_u = get_object_or_404(Title, pk=title_id)
         n_queryset = title_u.title_review.all()
 
         return n_queryset
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
-        title_u = get_object_or_404(Titles, pk=title_id)
+        title_u = get_object_or_404(Title, pk=title_id)
         serializer.save(author=self.request.user, title=title_u)
 
 
@@ -208,7 +208,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Titles, pk=title_id)
+        title = get_object_or_404(Title, pk=title_id)
         review_id = self.kwargs.get("review_id")
         review_u = get_object_or_404(Review, pk=review_id, title=title)
         n_queryset = review_u.comment.all()
@@ -216,7 +216,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(Titles, pk=title_id)
+        title = get_object_or_404(Title, pk=title_id)
         review_id = self.kwargs.get("review_id")
         review_u = get_object_or_404(Review, pk=review_id, title=title)
         serializer.save(author=self.request.user, review=review_u)

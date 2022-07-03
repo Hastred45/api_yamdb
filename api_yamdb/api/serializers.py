@@ -3,8 +3,9 @@ from datetime import datetime
 from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import Categories, Comments, Genres, Review, Titles
+from reviews.models import Categories, Comments, Genres, Review, Title
 from users.models import User
+from rest_framework.validators import UniqueTogetherValidator
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -94,7 +95,7 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
-        model = Titles
+        model = Title
 
     def get_rating(self, obj):
         avg_s = obj.title_review.all().aggregate(Avg('score'))
@@ -128,12 +129,23 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         slug_field="username"
     )
-
     class Meta:
         model = Review
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
         read_only_fields = ('id', 'title', 'author', 'pub_date')
 
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+
+        title_id = self.context['view'].kwargs.get('title_id')
+        author = self.context['request'].user
+        if Review.objects.filter(
+                author=author, title=title_id).exists():
+            raise serializers.ValidationError(
+                'You have already written this review some time ago.'
+            )
+        return data
 
 class CommentsSerializer(serializers.ModelSerializer):
 
