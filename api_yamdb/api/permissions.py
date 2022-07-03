@@ -30,6 +30,7 @@ class IsAdminOrReadOnly(BasePermission):
             )
         )
 
+
 class AuthorAndStaffOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return (

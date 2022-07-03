@@ -5,7 +5,6 @@ from rest_framework import serializers
 
 from reviews.models import Categories, Comments, Genres, Review, Title
 from users.models import User
-from rest_framework.validators import UniqueTogetherValidator
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -129,6 +128,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault(),
         slug_field="username"
     )
+
     class Meta:
         model = Review
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
@@ -146,6 +146,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'You have already written this review some time ago.'
             )
         return data
+
 
 class CommentsSerializer(serializers.ModelSerializer):
 
