@@ -1,7 +1,9 @@
-import datetime
+from datetime import datetime
+
+from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import Categories, Comments, Genres, Review, Titles
+from reviews.models import Categories, Comments, Genres, Review, Title
 from users.models import User
 
 
@@ -86,21 +88,35 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Categories.objects.all()
     )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category')
-        model = Titles
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
+        model = Title
+
+    def get_rating(self, obj):
+        avg_s = obj.title_review.all().aggregate(Avg('score'))
+
+        if avg_s['score__avg'] is None:
+            return
+        return round(avg_s['score__avg'])
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['category'] = CategoriesSerializer(instance.category).data
-        representation['genre'] = GenresSerializer(instance.genre.all(), many=True).data
+        representation['category'] = CategoriesSerializer(
+            instance.category
+        ).data
+        representation['genre'] = GenresSerializer(
+            instance.genre.all(), many=True
+        ).data
         return representation
 
     def validate_year(self, value):
         if value > datetime.now().year:
             raise serializers.ValidationError(
-                'Нельзя указать код больше текущего'
+                'Нельзя указать год больше текущего'
             )
         return value
 
@@ -118,6 +134,19 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'text', 'author', 'score', 'pub_date')
         read_only_fields = ('id', 'title', 'author', 'pub_date')
 
+    def validate(self, data):
+        if self.context['request'].method != 'POST':
+            return data
+
+        title_id = self.context['view'].kwargs.get('title_id')
+        author = self.context['request'].user
+        if Review.objects.filter(
+                author=author, title=title_id).exists():
+            raise serializers.ValidationError(
+                'You have already written this review some time ago.'
+            )
+        return data
+
 
 class CommentsSerializer(serializers.ModelSerializer):
 
@@ -131,4 +160,3 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('id', 'review', 'author', 'pub_date')
-
