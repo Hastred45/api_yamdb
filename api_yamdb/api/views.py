@@ -3,7 +3,7 @@ import uuid
 from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+# from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import api_view, action
 from rest_framework.pagination import (LimitOffsetPagination,
@@ -146,7 +146,7 @@ class TitlesViewSet(viewsets.ModelViewSet):
     5. Удалить произведение. Доступно только администратору.
     '''
     permission_classes = [IsAdminOrReadOnly]
-    filter_backends = (DjangoFilterBackend,)
+    # filter_backends = (DjangoFilterBackend,)
     queryset = Titles.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination

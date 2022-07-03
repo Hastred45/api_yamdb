@@ -100,7 +100,7 @@ class TitleSerializer(serializers.ModelSerializer):
         avg_s = obj.title_review.all().aggregate(Avg('score'))
 
         if avg_s['score__avg'] is None:
-            return 'None'
+            return
         return round(avg_s['score__avg'])
 
     def to_representation(self, instance):
