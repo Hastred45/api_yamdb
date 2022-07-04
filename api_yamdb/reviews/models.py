@@ -3,13 +3,6 @@ from django.db import models
 from users.models import User
 
 
-def get_delete_category():
-    return Categories.objects.get_or_create(
-        name='Категория была удалена администратором',
-        slug='deleted'
-    )[0]
-
-
 class Categories(models.Model):
     name = models.CharField(max_length=256,)
     slug = models.SlugField(unique=True,)
@@ -30,8 +23,9 @@ class Title(models.Model):
     )
     category = models.ForeignKey(
         Categories,
-        on_delete=models.SET(get_delete_category()),
+        on_delete=models.SET_NULL,
         related_name='category',
+        null=True
     )
 
 
