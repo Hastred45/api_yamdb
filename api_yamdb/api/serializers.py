@@ -11,7 +11,7 @@ class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required=True)
 
     def validate(self, data):
-        if data['username'] == 'me':
+        if (data['username']).lower() == 'me':
             raise serializers.ValidationError('Нельзя использовать логин me')
         return data
 
@@ -40,19 +40,8 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class MeSerializer(serializers.ModelSerializer):
+class MeSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
-
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'bio',
-            'role'
-        )
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
