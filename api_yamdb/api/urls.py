@@ -8,7 +8,7 @@ from .views import (CategoriesViewSet, CommentsViewSet, GenresViewSet,
 app_name = 'api'
 
 router = routers.DefaultRouter()
-router.register('users', UserViewSet)
+router.register('users', UserViewSet, 'user')
 router.register('categories', CategoriesViewSet, 'categories')
 router.register('genres', GenresViewSet, 'genres')
 router.register('titles', TitleViewSet, 'titles')
@@ -25,6 +25,6 @@ router.register(
 
 urlpatterns = [
     path('v1/', include(router.urls)),
-    path('v1/auth/token/', token_post),
-    path('v1/auth/signup/', signup_post),
+    path('v1/auth/token/', token_post, name='token_post'),
+    path('v1/auth/signup/', signup_post, name='signup_post'),
 ]

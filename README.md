@@ -49,3 +49,11 @@ python3 .\api_yamdb\manage.py runserver
 ### Примеры работы API:
 
 После запуска проекта откройте в браузере http://127.0.0.1:8000/redoc/
+
+### Авторы:
+
+Сергей - https://github.com/Hastred45
+
+Глеб - https://github.com/Gleb-K9
+
+Влад - https://github.com/Alpha-jpg-beep

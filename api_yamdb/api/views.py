@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 
 from django.core.mail import send_mail
 from django.db import IntegrityError
@@ -30,7 +31,7 @@ def signup_post(request):
     email = serializer.validated_data['email']
     username = serializer.validated_data['username']
     try:
-        user, create = User.objects.get_or_create(
+        user, _ = User.objects.get_or_create(
             username=username,
             email=email
         )
@@ -44,7 +45,7 @@ def signup_post(request):
     user.save()
     send_mail(
         'Код подверждения', confirmation_code,
-        ['admin@email.com'], (email, ), fail_silently=False
+        settings.DEFAULT_FROM_EMAIL, (email, ), fail_silently=False
     )
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -79,7 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=(IsAuthenticated, )
     )
     def get_patch_me(self, request):
-        user = get_object_or_404(User, username=self.request.user)
+        user = request.user
         if request.method == 'GET':
             serializer = MeSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
