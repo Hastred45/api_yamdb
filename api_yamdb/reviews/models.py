@@ -1,30 +1,34 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from users.models import User
+from .validators import year_validator
 
-
-class Categories(models.Model):
+class Category(models.Model):
     name = models.CharField(max_length=256,)
     slug = models.SlugField(unique=True,)
 
 
-class Genres(models.Model):
+class Genre(models.Model):
     name = models.CharField(max_length=256,)
     slug = models.SlugField(unique=True,)
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256,)
-    year = models.IntegerField(default="",)
+    name = models.CharField(max_length=256, db_index=True)
+    year = models.PositiveSmallIntegerField(
+        default="",
+        validators=[year_validator],
+    )
     description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(
-        Genres,
-        related_name='genre',
+        Genre,
+        related_name='titles',
     )
     category = models.ForeignKey(
-        Categories,
+        Category,
         on_delete=models.SET_NULL,
-        related_name='category',
+        related_name='titles',
         null=True
     )
 
