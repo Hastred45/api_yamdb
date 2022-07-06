@@ -4,33 +4,70 @@ from django.db import models
 from users.models import User
 from .validators import year_validator
 
+
 class Category(models.Model):
-    name = models.CharField(max_length=256,)
-    slug = models.SlugField(unique=True,)
+    name = models.CharField(
+        'Имя категории',
+        max_length=256,
+    )
+    slug = models.SlugField(
+        'Уникальный человекочитаемый ключ для поиска категории',
+        unique=True,
+    )
+
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=256,)
-    slug = models.SlugField(unique=True,)
+    name = models.CharField(
+        'Имя жанра',
+        max_length=256,
+    )
+    slug = models.SlugField(
+        'Уникальный человекочитаемый ключ для поиска жанра',
+        unique=True,
+    )
+
+    class Meta:
+        verbose_name = 'Genre'
+        verbose_name_plural = 'Genres'
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256, db_index=True)
+    name = models.CharField(
+        'Имя произведения',
+        max_length=256,
+        db_index=True
+    )
     year = models.PositiveSmallIntegerField(
+        'Год произведения',
         default="",
         validators=[year_validator],
     )
-    description = models.CharField(max_length=256, blank=True, null=True)
+    description = models.CharField(
+        'Описание произведения',
+        max_length=256,
+        blank=True,
+        null=True
+    )
     genre = models.ManyToManyField(
+        'Жанр произведения',
         Genre,
         related_name='titles',
     )
     category = models.ForeignKey(
+        'Категория произведения',
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
         null=True
     )
+
+    class Meta:
+        verbose_name = 'Title'
+        verbose_name_plural = 'Titles'
 
 
 class Review(models.Model):

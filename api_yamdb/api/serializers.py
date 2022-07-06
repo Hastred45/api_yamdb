@@ -120,6 +120,7 @@ class TitleDisplaySerializer(serializers.ModelSerializer):
             return
         return round(avg_s['score__avg'])
 
+
 class ReviewSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(

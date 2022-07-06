@@ -18,8 +18,9 @@ from .filters import TitleFilter
 from .permissions import (AuthorAndStaffOrReadOnly, IsAdminOrReadOnly,
                           OwnerOrAdmins)
 from .serializers import (CategorySerializer, CommentsSerializer,
-                          GenreSerializer, MeSerializer, ReviewSerializer,
-                          SignUpSerializer, TitleDisplaySerializer, TitleCreateSerializer,
+                          GenreSerializer, MeSerializer,
+                          SignUpSerializer, TitleDisplaySerializer,
+                          TitleCreateSerializer, ReviewSerializer,
                           UserSerializer, TokenSerializer)
 
 
@@ -91,9 +92,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
-                                mixins.ListModelMixin,
-                                mixins.DestroyModelMixin,
-                                viewsets.GenericViewSet):
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
     """
     A viewset that provides `destroy`, `create`, and `list` actions.
     """
@@ -109,7 +110,7 @@ class CategoriesViewSet(CreateListDestroyViewSet):
     2. Добавить категорию. Доступно только администратору.
     3. Удалить категорию. Доступно только администратору.
     '''
-    #permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -127,7 +128,7 @@ class GenresViewSet(CreateListDestroyViewSet):
     2. Добавить жанр. Доступно только администратору.
     3. Удалить жанр. Доступно только администратору.
     '''
-    #permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -150,7 +151,7 @@ class TitleViewSet(viewsets.ModelViewSet):
        Доступно только администратору.
     5. Удалить произведение. Доступно только администратору.
     '''
-    #permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     queryset = Title.objects.all()
     pagination_class = LimitOffsetPagination
@@ -174,6 +175,7 @@ class TitleViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
             headers=headers
         )
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     '''
