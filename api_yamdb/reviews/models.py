@@ -7,12 +7,12 @@ from .validators import year_validator
 
 class Category(models.Model):
     name = models.CharField(
-        'Имя категории',
         max_length=256,
+        verbose_name='Имя категории',
     )
     slug = models.SlugField(
-        'Уникальный человекочитаемый ключ для поиска категории',
         unique=True,
+        verbose_name='Уникальный человекочитаемый ключ для поиска категории'
     )
 
     class Meta:
@@ -22,12 +22,12 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        'Имя жанра',
         max_length=256,
+        verbose_name='Имя жанра'
     )
     slug = models.SlugField(
-        'Уникальный человекочитаемый ключ для поиска жанра',
         unique=True,
+        verbose_name='Уникальный человекочитаемый ключ для поиска жанра'
     )
 
     class Meta:
@@ -37,32 +37,32 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        'Имя произведения',
         max_length=256,
-        db_index=True
+        db_index=True,
+        verbose_name='Имя произведения'
     )
     year = models.PositiveSmallIntegerField(
-        'Год произведения',
         default="",
         validators=[year_validator],
+        verbose_name='Год произведения'
     )
     description = models.CharField(
-        'Описание произведения',
         max_length=256,
         blank=True,
-        null=True
+        null=True,
+        verbose_name='Описание произведения'
     )
     genre = models.ManyToManyField(
-        'Жанр произведения',
         Genre,
         related_name='titles',
+        verbose_name='Жанр произведения',
     )
     category = models.ForeignKey(
-        'Категория произведения',
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
-        null=True
+        null=True,
+        verbose_name='Категория произведения'
     )
 
     class Meta:

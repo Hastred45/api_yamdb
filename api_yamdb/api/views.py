@@ -110,7 +110,7 @@ class CategoriesViewSet(CreateListDestroyViewSet):
     2. Добавить категорию. Доступно только администратору.
     3. Удалить категорию. Доступно только администратору.
     '''
-    # permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -128,7 +128,7 @@ class GenresViewSet(CreateListDestroyViewSet):
     2. Добавить жанр. Доступно только администратору.
     3. Удалить жанр. Доступно только администратору.
     '''
-    # permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -151,7 +151,7 @@ class TitleViewSet(viewsets.ModelViewSet):
        Доступно только администратору.
     5. Удалить произведение. Доступно только администратору.
     '''
-    # permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     queryset = Title.objects.all()
     pagination_class = LimitOffsetPagination
@@ -174,6 +174,25 @@ class TitleViewSet(viewsets.ModelViewSet):
             TitleDisplaySerializer(Title.objects.get(pk=title_id)).data,
             status=status.HTTP_201_CREATED,
             headers=headers
+        )
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        title_id = serializer.data['id']
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(
+            TitleDisplaySerializer(Title.objects.get(pk=title_id)).data
         )
 
 
