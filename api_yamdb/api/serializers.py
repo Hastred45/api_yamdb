@@ -1,8 +1,7 @@
-from datetime import datetime
-
+from django.utils import timezone
 from django.db.models import Avg
 from rest_framework import serializers
-from reviews.models import Categories, Comments, Genres, Review, Title
+from reviews.models import Category, Comments, Genre, Review, Title
 from users.models import User
 
 
@@ -44,39 +43,57 @@ class MeSerializer(UserSerializer):
     role = serializers.CharField(read_only=True)
 
 
-class CategoriesSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug')
-        model = Categories
+        exclude = ['id']
+        model = Category
         lookup_field = 'slug'
         extra_kwargs = {
             'url': {'lookup_field': 'slug'}
         }
 
 
-class GenresSerializer(serializers.ModelSerializer):
+class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = ('name', 'slug')
-        model = Genres
+        exclude = ['id']
+        model = Genre
         lookup_field = 'slug'
         extra_kwargs = {
             'url': {'lookup_field': 'slug'}
         }
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
-        queryset=Genres.objects.all()
+        queryset=Genre.objects.all()
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Categories.objects.all(),
+        queryset=Category.objects.all(),
         allow_null=False
     )
+
+    class Meta:
+        fields = (
+            'id', 'name', 'year', 'description', 'genre', 'category'
+        )
+        model = Title
+
+    def validate_year(self, value):
+        if value > timezone.now().year:
+            raise serializers.ValidationError(
+                'Нельзя указать год больше текущего'
+            )
+        return value
+
+
+class TitleDisplaySerializer(serializers.ModelSerializer):
+    genre = CategorySerializer(many=True)
+    category = GenreSerializer()
     rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -91,23 +108,6 @@ class TitleSerializer(serializers.ModelSerializer):
         if avg_s['score__avg'] is None:
             return
         return round(avg_s['score__avg'])
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['category'] = CategoriesSerializer(
-            instance.category
-        ).data
-        representation['genre'] = GenresSerializer(
-            instance.genre.all(), many=True
-        ).data
-        return representation
-
-    def validate_year(self, value):
-        if value > datetime.now().year:
-            raise serializers.ValidationError(
-                'Нельзя указать год больше текущего'
-            )
-        return value
 
 
 class ReviewSerializer(serializers.ModelSerializer):

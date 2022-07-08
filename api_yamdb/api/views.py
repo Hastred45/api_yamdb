@@ -12,16 +12,17 @@ from rest_framework.pagination import (LimitOffsetPagination,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Categories, Genres, Review, Title
+from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
 from .filters import TitleFilter
 from .permissions import (AuthorAndStaffOrReadOnly, IsAdminOrReadOnly,
                           OwnerOrAdmins)
-from .serializers import (CategoriesSerializer, CommentsSerializer,
-                          GenresSerializer, MeSerializer, ReviewSerializer,
-                          SignUpSerializer, TitleSerializer, TokenSerializer,
-                          UserSerializer)
+from .serializers import (CategorySerializer, CommentsSerializer,
+                          GenreSerializer, MeSerializer,
+                          SignUpSerializer, TitleDisplaySerializer,
+                          TitleCreateSerializer, ReviewSerializer,
+                          UserSerializer, TokenSerializer)
 
 
 @api_view(['POST'])
@@ -91,10 +92,17 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class CategoriesViewSet(mixins.ListModelMixin,
-                        mixins.CreateModelMixin,
-                        mixins.DestroyModelMixin,
-                        viewsets.GenericViewSet):
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet):
+    """
+    A viewset that provides `destroy`, `create`, and `list` actions.
+    """
+    pass
+
+
+class CategoriesViewSet(CreateListDestroyViewSet):
     '''
     Категории.
     Вьюсет дает возможности:
@@ -105,17 +113,14 @@ class CategoriesViewSet(mixins.ListModelMixin,
     '''
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
-    queryset = Categories.objects.all()
-    serializer_class = CategoriesSerializer
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
     pagination_class = LimitOffsetPagination
     search_fields = ('name', '=slug')
     lookup_field = 'slug'
 
 
-class GenresViewSet(mixins.ListModelMixin,
-                    mixins.CreateModelMixin,
-                    mixins.DestroyModelMixin,
-                    viewsets.GenericViewSet):
+class GenresViewSet(CreateListDestroyViewSet):
     '''
     Жанры.
     Вьюсет дает возможности:
@@ -126,8 +131,8 @@ class GenresViewSet(mixins.ListModelMixin,
     '''
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (filters.SearchFilter,)
-    queryset = Genres.objects.all()
-    serializer_class = GenresSerializer
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
     lookup_field = 'slug'
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter, )
@@ -150,10 +155,46 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
     filter_class = TitleFilter
     search_fields = ('category', 'genre', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleDisplaySerializer
+        if self.action in ['create', 'update', 'partial_update']:
+            return TitleCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        title_id = serializer.data['id']
+        return Response(
+            TitleDisplaySerializer(Title.objects.get(pk=title_id)).data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=partial
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        title_id = serializer.data['id']
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(
+            TitleDisplaySerializer(Title.objects.get(pk=title_id)).data
+        )
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

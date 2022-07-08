@@ -1,32 +1,73 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from users.models import User
+from .validators import year_validator
 
 
-class Categories(models.Model):
-    name = models.CharField(max_length=256,)
-    slug = models.SlugField(unique=True,)
+class Category(models.Model):
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Имя категории',
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Уникальный человекочитаемый ключ для поиска категории'
+    )
+
+    class Meta:
+        verbose_name = 'Category'
+        verbose_name_plural = 'Categories'
 
 
-class Genres(models.Model):
-    name = models.CharField(max_length=256,)
-    slug = models.SlugField(unique=True,)
+class Genre(models.Model):
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Имя жанра'
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Уникальный человекочитаемый ключ для поиска жанра'
+    )
+
+    class Meta:
+        verbose_name = 'Genre'
+        verbose_name_plural = 'Genres'
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256,)
-    year = models.IntegerField(default="",)
-    description = models.CharField(max_length=256, blank=True, null=True)
+    name = models.CharField(
+        max_length=256,
+        db_index=True,
+        verbose_name='Имя произведения'
+    )
+    year = models.PositiveSmallIntegerField(
+        default="",
+        validators=[year_validator],
+        verbose_name='Год произведения'
+    )
+    description = models.CharField(
+        max_length=256,
+        blank=True,
+        null=True,
+        verbose_name='Описание произведения'
+    )
     genre = models.ManyToManyField(
-        Genres,
-        related_name='genre',
+        Genre,
+        related_name='titles',
+        verbose_name='Жанр произведения',
     )
     category = models.ForeignKey(
-        Categories,
+        Category,
         on_delete=models.SET_NULL,
-        related_name='category',
-        null=True
+        related_name='titles',
+        null=True,
+        verbose_name='Категория произведения'
     )
+
+    class Meta:
+        verbose_name = 'Title'
+        verbose_name_plural = 'Titles'
 
 
 class Review(models.Model):
