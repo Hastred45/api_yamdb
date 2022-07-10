@@ -1,7 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from .views import (CategoriesViewSet, CommentsViewSet, GenresViewSet,
+from .views import (CategoriesViewSet, CommentViewSet, GenresViewSet,
                     ReviewViewSet, TitleViewSet, UserViewSet, signup_post,
                     token_post)
 
@@ -19,7 +19,7 @@ router.register(
 )
 router.register(
     r'titles/(?P<title_id>[\d]+)/reviews/(?P<review_id>[\d]+)/comments',
-    CommentsViewSet,
+    CommentViewSet,
     basename='comments',
 )
 

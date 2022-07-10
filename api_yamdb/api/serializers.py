@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.db.models import Avg
 from rest_framework import serializers
-from reviews.models import Category, Comments, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
@@ -137,7 +137,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         return data
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
 
     author = serializers.SlugRelatedField(
         read_only=True,
@@ -146,6 +146,6 @@ class CommentsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Comments
+        model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
         read_only_fields = ('id', 'review', 'author', 'pub_date')

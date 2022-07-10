@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Comments, Genre, Review, Title
+from .models import Category, Comment, Genre, Review, Title
 
 
 @admin.register(Category)
@@ -16,8 +16,8 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Comments)
-class CommentsAdmin(admin.ModelAdmin):
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'review',

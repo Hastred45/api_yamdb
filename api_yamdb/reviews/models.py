@@ -121,7 +121,7 @@ class Review(models.Model):
         verbose_name_plural = 'Reviews'
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,

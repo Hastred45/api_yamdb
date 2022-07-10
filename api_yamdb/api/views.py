@@ -18,7 +18,7 @@ from users.models import User
 from .filters import TitleFilter
 from .permissions import (AuthorAndStaffOrReadOnly, IsAdminOrReadOnly,
                           OwnerOrAdmins)
-from .serializers import (CategorySerializer, CommentsSerializer,
+from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, MeSerializer,
                           SignUpSerializer, TitleDisplaySerializer,
                           TitleCreateSerializer, ReviewSerializer,
@@ -228,7 +228,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title_u)
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     '''
     Комментарии.
     Вьюсет дает возможности:
@@ -241,7 +241,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     5. Удалить комментарий к отзыву по id.
        Доступно только авторам комментария, модераторам или администраторам.
     '''
-    serializer_class = CommentsSerializer
+    serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAndStaffOrReadOnly]
 
