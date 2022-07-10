@@ -69,6 +69,9 @@ class Title(models.Model):
         verbose_name = 'Title'
         verbose_name_plural = 'Titles'
 
+    def display_genre(self):
+        return ', '.join([genre.name for genre in self.genre.all()])
+
 
 class Review(models.Model):
     title = models.ForeignKey(
