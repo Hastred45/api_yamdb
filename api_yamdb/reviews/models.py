@@ -94,8 +94,14 @@ class Review(models.Model):
     score = models.IntegerField(
         verbose_name='Оценка',
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10),
+            MinValueValidator(
+                1,
+                message='The value must be at least 1.'
+            ),
+            MaxValueValidator(
+                10,
+                message='The value must be no more than 10.'
+            ),
         ],
     )
     pub_date = models.DateTimeField(
