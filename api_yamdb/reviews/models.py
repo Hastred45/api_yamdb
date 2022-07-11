@@ -109,9 +109,6 @@ class Review(models.Model):
         auto_now_add=True
     )
 
-    def __str__(self):
-        return self.text
-
     class Meta:
         constraints = (
             models.CheckConstraint(
@@ -125,6 +122,10 @@ class Review(models.Model):
         )
         verbose_name = 'Review'
         verbose_name_plural = 'Reviews'
+        ordering = ['pub_date']
+
+    def __str__(self):
+        return self.text
 
 
 class Comment(models.Model):
