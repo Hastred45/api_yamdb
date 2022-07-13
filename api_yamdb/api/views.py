@@ -1,8 +1,9 @@
 import uuid
-from django.conf import settings
 
+from django.conf import settings
 from django.core.mail import send_mail
 from django.db import IntegrityError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -12,17 +13,18 @@ from rest_framework.pagination import (LimitOffsetPagination,
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
 from .filters import TitleFilter
 from .permissions import (AuthorAndStaffOrReadOnly, IsAdminOrReadOnly,
                           OwnerOrAdmins)
-from .serializers import (CategorySerializer, CommentsSerializer,
-                          GenreSerializer, MeSerializer,
-                          SignUpSerializer, TitleDisplaySerializer,
-                          TitleCreateSerializer, ReviewSerializer,
-                          UserSerializer, TokenSerializer)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, MeSerializer, ReviewSerializer,
+                          SignUpSerializer, TitleCreateSerializer,
+                          TitleDisplaySerializer, TokenSerializer,
+                          UserSerializer)
 
 
 @api_view(['POST'])
@@ -154,7 +156,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     '''
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).all()
     pagination_class = LimitOffsetPagination
     filter_class = TitleFilter
     search_fields = ('category', 'genre', 'name', 'year')
@@ -218,7 +221,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs.get("title_id")
         title_u = get_object_or_404(Title, pk=title_id)
-        n_queryset = title_u.title_review.all()
+        n_queryset = title_u.reviews.all()
 
         return n_queryset
 
@@ -228,7 +231,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title_u)
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     '''
     Комментарии.
     Вьюсет дает возможности:
@@ -241,7 +244,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
     5. Удалить комментарий к отзыву по id.
        Доступно только авторам комментария, модераторам или администраторам.
     '''
-    serializer_class = CommentsSerializer
+    serializer_class = CommentSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = [AuthorAndStaffOrReadOnly]
 
@@ -250,7 +253,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, pk=title_id)
         review_id = self.kwargs.get("review_id")
         review_u = get_object_or_404(Review, pk=review_id, title=title)
-        n_queryset = review_u.comment.all()
+        n_queryset = review_u.comments.all()
         return n_queryset
 
     def perform_create(self, serializer):
