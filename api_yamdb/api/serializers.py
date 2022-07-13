@@ -1,6 +1,6 @@
 from django.utils import timezone
-from django.db.models import Avg
 from rest_framework import serializers
+
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
@@ -94,20 +94,13 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 class TitleDisplaySerializer(serializers.ModelSerializer):
     genre = CategorySerializer(many=True)
     category = GenreSerializer()
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
         model = Title
-
-    def get_rating(self, obj):
-        avg_s = obj.reviews.all().aggregate(Avg('score'))
-
-        if avg_s['score__avg'] is None:
-            return
-        return round(avg_s['score__avg'])
 
 
 class ReviewSerializer(serializers.ModelSerializer):
