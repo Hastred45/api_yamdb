@@ -70,7 +70,7 @@ class Title(models.Model):
         verbose_name_plural = 'Titles'
 
     def display_genre(self):
-        return ', '.join([genre.name for genre in self.genre.all()])
+        return list(self.genre.all().values_list('name', flat=True))
 
 
 class Review(models.Model):
