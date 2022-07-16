@@ -10,7 +10,7 @@ class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required=True)
 
     def validate(self, data):
-        if (data['username']).lower() == 'me':
+        if data['username'].lower() == 'me':
             raise serializers.ValidationError('Нельзя использовать логин me')
         return data
 
