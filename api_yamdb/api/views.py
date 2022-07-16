@@ -94,7 +94,6 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 class CategoriesViewSet(CreateListDestroyViewSet):
     '''
     Категории.
@@ -158,7 +157,6 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitleDisplaySerializer
         if self.action in ['create', 'update', 'partial_update']:
             return TitleCreateSerializer
-
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
